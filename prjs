@@ -1,0 +1,88 @@
+#!/bin/bash
+
+PRJSFILE="$HOME/.prjs"
+
+# Make sure prjsfile exists
+if [ ! -f "$PRJSFILE" ]; then
+	echo -e -n "No $PRJSFILE file exists...\nCreate one? "
+	read -n1 ans
+	echo
+	if [ "$ans" == "y" ]; then
+		touch "$PRJSFILE"
+	else
+		echo -e -n "Prjs cannot be used without a .prj file!\n"
+	fi
+fi
+
+# Run through command opts
+if [ "$1" == "--set" ] || [ "$1" == "-s" ]; then
+	if [ "$2" != "" ]; then
+		if [ "$(cat "$PRJSFILE" | grep "$2")" == "" ]; then
+			echo -e -n "$2\n$(pwd)\n" >> "$PRJSFILE"
+			echo -e -n "Added $2 at directory $(pwd) to prjsfile\n"
+		else
+			echo -e -n "Entry $2 already exists!\n"
+		fi
+	else
+		echo -e -n "You must specify a project name!\n"
+	fi
+elif [ "$1" == "--list" ] || [ "$1" == "-l" ]; then
+	echo -e -n "Bookmarks: \n"
+	awk 'NR % 2' "$PRJSFILE"
+elif [ "$1" == "--delete" ] || [ "$1" == "-d" ]; then
+	if [ "$2" != "" ]; then
+		if [ $(cat "$PRJSFILE" | grep "$2") == "" ]; then
+			echo -e -n "Project '$2' not found\n"
+		else
+			PRJNAMELINE=$(grep -xn "$2" "$PRJSFILE" | grep -Eo '^[^:]+')
+			PATHLINE=$((PRJNAMELINE+1))
+			sed -i.bak "$PRJNAMELINE,${PATHLINE}d" "$PRJSFILE"
+		fi
+	else
+		echo -e -n "Could not find $2 in $PRJSFILE"
+	fi
+elif [ "$1" == "--restore" ] || [ "$1" == "-r" ]; then
+	if [ -f "$PRJSFILE.bak" ]; then
+		echo -e -n "Backup file found at $PRJSFILE.bak. Contents: \n"
+		cat "$PRJSFILE.bak"
+		echo -e -n "\nRestore? "
+		read -n1 ans
+		echo
+		if [ "$ans" == "y" ]; then
+			echo -e -n "Restoring...\n"
+			cp "$PRJSFILE.bak" "$PRJSFILE"
+		else
+			echo -e -n "Cancelling...\n"
+		fi
+	else
+		echo -e -n "Could not find $PRJSFILE.bak\n"
+	fi
+elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+	echo -e -n "--Basic project manager--\n\n"
+	echo -e -n "--set/-s [project name] : Sets the current directory to input project name\n"
+	echo -e -n "--list/-l : Lists all projects\n"
+	echo -e -n "--delete/-d [project name] : Deletes the input project, storing a backup\n"
+	echo -e -n "--restore/-r : Restores the previous backup file for $PRJSFILE\n"
+	echo -e -n "[project name] : Goes to that projects directory, runs git status and ls\n"
+	echo -e -n "\n-- creikey --\n"
+else
+	if [ "$1" == "" ]; then
+		echo -e -n "Use --help for help\n"
+	elif [ "$(cat "$PRJSFILE" | grep "$1")" == "" ]; then
+		echo -e -n "Project $1 not found\nProjects:\n"
+		awk 'NR % 2' "$PRJSFILE"
+	else
+		PRJNAMELINE=$(grep -xn "$1" "$PRJSFILE" | grep -Eo '^[^:]+')
+		PATHLINE=$((PRJNAMELINE+1))
+		PRJPATH=$(sed "${PATHLINE}q;d" "$PRJSFILE")
+		cd "$PRJPATH"
+		echo -e -n "\nYou are now in project '$1'\n"
+		ls
+		if [ -d ".git" ]; then
+			git status
+		fi
+		echo
+	fi
+fi
+
+
