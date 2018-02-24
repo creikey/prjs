@@ -2,13 +2,9 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 INSTALLCOMMAND="alias prjs='source $SCRIPTDIR/prjs'"
 
-echo -e -n "Install command is: $INSTALLCOMMAND\n"
-
 is_installed() {
 	echo -n "$(grep -xn "$INSTALLCOMMAND" "$HOME/.bashrc")" 
 }
-
-echo "Script dir is: $SCRIPTDIR"
 
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
 	echo -e -n "--Manages prjs--\n--install : installs to .bashrc\n--uninstall : uninstalls from the bashrc\n"
