@@ -60,11 +60,11 @@ elif [ "$1" == "--restore" ] || [ "$1" == "-r" ]; then
 	fi
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
-	echo -e -n "--set/-s [project name] : Sets the current directory to input project name\n"
-	echo -e -n "--list/-l : Lists all projects\n"
-	echo -e -n "--delete/-d [project name] : Deletes the input project, storing a backup\n"
-	echo -e -n "--restore/-r : Restores the previous backup file for $PRJSFILE\n"
-	echo -e -n "[project name] : Goes to that projects directory, runs git status and ls\n"
+	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
+	echo -e -n "| --list/-l : Lists all projects\n"
+	echo -e -n "| --delete/-d [project name] : Deletes the input project, storing a backup\n"
+	echo -e -n "| --restore/-r : Restores the previous backup file for $PRJSFILE\n"
+	echo -e -n "| [project name] : Goes to that projects directory, runs git status and ls\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
