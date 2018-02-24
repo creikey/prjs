@@ -31,12 +31,13 @@ elif [ "$1" == "--list" ] || [ "$1" == "-l" ]; then
 	awk 'NR % 2' "$PRJSFILE"
 elif [ "$1" == "--delete" ] || [ "$1" == "-d" ]; then
 	if [ "$2" != "" ]; then
-		if [ $(cat "$PRJSFILE" | grep "$2") == "" ]; then
+		if [ "$(cat "$PRJSFILE" | grep "$2")" == "" ]; then
 			echo -e -n "Project '$2' not found\n"
 		else
 			PRJNAMELINE=$(grep -xn "$2" "$PRJSFILE" | grep -Eo '^[^:]+')
 			PATHLINE=$((PRJNAMELINE+1))
 			sed -i.bak "$PRJNAMELINE,${PATHLINE}d" "$PRJSFILE"
+			echo -e -n "Deleted project $2\n"
 		fi
 	else
 		echo -e -n "Could not find $2 in $PRJSFILE"
@@ -84,5 +85,3 @@ else
 		echo
 	fi
 fi
-
-
