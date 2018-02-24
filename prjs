@@ -2,6 +2,36 @@
 
 PRJSFILE="$HOME/.prjs"
 
+# Update project list
+update_project_list() {
+	echo -e -n "Making backup..."
+	cp "$PRJSFILE" "$PRJSFILE.update.bak"
+	if [ -f "$PRJSFILE.update.bak" ]; then
+		echo -e -n "OK!\n"
+	else
+		echo -e -n "FAIL!\n"
+	fi
+	echo -e -n "\n! - Back up is $PRJSFILE.update.bak - !\n"
+	LINENUMB=1
+	BKMARKS=$(awk 'NR % 2' "$PRJSFILE")
+	while read -r b; do
+		CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
+		echo -e -n "Checking directory $CURDIR..."
+		if [ -d "$CURDIR" ]; then
+			echo -e -n "OK!\n"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "--Deleting..."
+			sed -i "$LINENUMB,$((LINENUMB+1))d" "$PRJSFILE"
+			echo -e -n "Deleted $b!\n"
+		fi
+		# echo "Curdir is: $CURDIR"
+		# echo "Line is: $b"
+		# echo "Line numb is: $LINENUMB"
+		LINENUMB=$((LINENUMB+2))
+	done <<< "$BKMARKS"
+}
+
 # Make sure prjsfile exists
 if [ ! -f "$PRJSFILE" ]; then
 	echo -e -n "No $PRJSFILE file exists...\nCreate one? "
@@ -69,6 +99,8 @@ elif [ "$1" == "--zip" ] || [ "$1" == "-z" ]; then
 	done
 	echo -e -n "Running: zip -r out.zip ${PRJPATHS}${PRJSFILE}\n\n"
 	zip -r out.zip ${TOPASS[*]}
+elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
+	update_project_list
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
 	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
@@ -77,6 +109,7 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| --restore/-r : Restores the previous backup file for $PRJSFILE\n"
 	echo -e -n "| [project name] : Goes to that projects directory, runs git status and ls\n"
 	echo -e -n "| --zip/-z : zip up projects and $PRJSFILE, output to current directory\n"
+	echo -e -n "| --update/-u : forces updating of project list to get rid of deleted ones\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
