@@ -32,8 +32,7 @@ elif [ "$1" == "--update" ]; then
 			fi
 		fi
 		echo -e -n "OK!\n\n"
-		git fetch --all
-		git reset --hard origin/master
+		git pull origin master
 	fi
 elif [ "$1" == "--install" ]; then
 	if [ "$(is_installed)" == "" ]; then
