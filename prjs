@@ -149,6 +149,43 @@ elif [ "$1" == "--delall" ] || [ "$1" == "-da" ]; then
 	done
 elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
 	update_project_list
+elif [ "$1" == "--git-update" ] || [ "$1" == "-gu" ]; then
+	ORIGINALDIR=$(pwd)
+	LINENUMB=1
+	BKMARKS=$(awk 'NR % 2' "$PRJSFILE")
+	UPDATED=""
+	while read -r b; do
+		CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
+		echo -e -n "Checking directory $CURDIR..."
+		if [ -d "$CURDIR" ]; then
+			cd "$CURDIR"
+			if [ ! -d ".git" ]; then
+				echo -e -n "FAIL!\n"
+				echo -e -n "-No git repository\n"
+			else
+				if [ "$(git remote -v | grep origin)" == "" ]; then
+					echo -e -n "FAIL!\n"
+					echo -e -n "-No origin remote\n"
+				else
+					echo -e -n "OK!\n"
+					UPDATESTATUS=$(git pull origin master | grep Updating)
+					if [ "$UPDATESTATUS" != "" ]; then
+						UPDATED="$UPDATED\n$b -> $CURDIR"
+					fi
+				fi
+			fi
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-Projects aren't up to date. run --update\n"
+			return
+			# sed -i "$LINENUMB,$((LINENUMB+1))d" "$PRJSFILE"
+		fi
+		LINENUMB=$((LINENUMB+2))
+	done <<< "$BKMARKS"
+	echo -e -n "\n\n--Updated projects--\n"
+	echo -e -n "$UPDATED"
+	echo
+	cd "$ORIGINALDIR"
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
 	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
@@ -160,6 +197,7 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| --update/-u : forces updating of project list to get rid of deleted ones\n"
 	echo -e -n "| --all/-a : Adds all folders in current directory, with the project name being the directory name\n"
 	echo -e -n "| --delall/-da : deletes all projects in the current working directory\n"
+	echo -e -n "| --git-update/-gu : updates all projects with a git repository on origin/master\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
