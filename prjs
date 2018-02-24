@@ -78,8 +78,10 @@ else
 		PRJPATH=$(sed "${PATHLINE}q;d" "$PRJSFILE")
 		cd "$PRJPATH"
 		echo -e -n "\nYou are now in project '$1'\n"
+		echo -e -n "\n------ Contents ------\n"
 		ls
 		if [ -d ".git" ]; then
+			echo -e -n "\n------ Git status ------\n"
 			git status
 		fi
 		echo
