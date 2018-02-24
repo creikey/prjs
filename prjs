@@ -47,7 +47,7 @@ fi
 # Run through command opts
 if [ "$1" == "--set" ] || [ "$1" == "-s" ]; then
 	if [ "$2" != "" ]; then
-		if [ "$(cat "$PRJSFILE" | grep "$2")" == "" ]; then
+		if [ "$(cat "$PRJSFILE" | grep -x "$2")" == "" ]; then
 			echo -e -n "$2\n$(pwd)/\n" >> "$PRJSFILE"
 			echo -e -n "Added $2 at directory $(pwd) to prjsfile\n"
 		else
@@ -99,6 +99,54 @@ elif [ "$1" == "--zip" ] || [ "$1" == "-z" ]; then
 	done
 	echo -e -n "Running: zip -r out.zip ${PRJPATHS}${PRJSFILE}\n\n"
 	zip -r out.zip ${TOPASS[*]}
+elif [ "$1" == "--all" ] || [ "$1" == "-a" ]; then
+	echo -e -n "\n--Adding all projects--\n"
+	for d in *; do
+		echo -e -n "Checking $d..."
+		if [ -d "$d" ]; then
+			echo -e -n "OK!\n"
+			PRJSTATUS=$(prjs -l | grep "$d")
+			if [ "$PRJSTATUS" == "" ]; then
+				echo -e -n "Adding project $d..."
+				cd "$d"
+				prjs -s "$d">/dev/null
+				cd ..
+				PRJSTATUS=$(prjs -l | grep "$d")
+				if [ "$PRJSTATUS" == "" ]; then
+					echo -e -n "FAIL!\n"
+					echo -e -n "--Project $d not found when prjs -l run!\n"
+				else
+					echo -e -n "OK!\n"
+				fi
+			fi
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-$d is not a directory\n"
+		fi
+	done
+elif [ "$1" == "--delall" ] || [ "$1" == "-da" ]; then
+	for d in *; do
+		echo -e -n "Checking $d..."
+		if [ -d "$d" ]; then
+			if [ "$(prjs -l | grep "$d")" != "" ]; then
+				echo -e -n "OK!\n"
+				echo -e -n "Deleting $d..."
+				prjs -d "$d">/dev/null
+				if [ "$(prjs -l | grep "$d")" == "" ]; then
+					echo -e -n "OK!\n"
+				else
+					echo -e -n "FAIL!\n"
+					echo -e -n "-Failed to delete project $d with prjs -d\n"
+				fi
+			else
+				echo -e -n "FAIL!\n"
+				echo -e -n "-Project $d not added to prjs\n"
+			fi
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-$d is not a folder\n"
+		fi
+	done
 elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
 	update_project_list
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
@@ -110,6 +158,8 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| [project name] : Goes to that projects directory, runs git status and ls\n"
 	echo -e -n "| --zip/-z : zip up projects and $PRJSFILE, output to current directory\n"
 	echo -e -n "| --update/-u : forces updating of project list to get rid of deleted ones\n"
+	echo -e -n "| --all/-a : Adds all folders in current directory, with the project name being the directory name\n"
+	echo -e -n "| --delall/-da : deletes all projects in the current working directory\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
