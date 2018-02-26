@@ -224,8 +224,6 @@ else
 				echo -e -n "No bookmarks made\n"
 				return
 			fi
-			echo -e -n "Checking for icon file..."
-		
 			TORUN="zenity --window-icon=\"$ICONPATH\" --height=600 --width=300 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
 			while read -r b; do
 				CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
@@ -233,6 +231,7 @@ else
 				LINENUMB=$((LINENUMB+2))
 			done <<< "$BKMARKS"
 			TORUN="$TORUN Exit"
+			TORUN="$TORUN 2>/dev/null"
 			TOBKMRK="$(eval $TORUN)"
 			if [ "$TOBKMRK" == "Exit" ] || [ "$TOBKMRK" == "" ]; then
 				echo -e -n "Exiting..."
