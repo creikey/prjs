@@ -1,9 +1,16 @@
 #!/bin/bash
 
 PRJSFILE="$HOME/.prjs"
+ICONPATH="$HOME/.prjs-icon.png"
 
 # Check for zenity
 ZENITYSUPPORT=$(command -v zenity)
+
+# Check for icon
+if [ ! -f "$ICONPATH" ]; then
+	echo -e -n "ABORT - NO ICON INSTALLED\nRUN ./manage.sh --uninstall && ./manage.sh --install\n"
+	return
+fi
 
 # Update project list
 update_project_list() {
@@ -217,7 +224,9 @@ else
 				echo -e -n "No bookmarks made\n"
 				return
 			fi
-			TORUN="zenity --height=600 --width=300 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
+			echo -e -n "Checking for icon file..."
+		
+			TORUN="zenity --window-icon=\"$ICONPATH\" --height=600 --width=300 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
 			while read -r b; do
 				CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
 				TORUN="$TORUN \"$b\" FALSE "

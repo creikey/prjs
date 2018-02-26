@@ -37,12 +37,19 @@ elif [ "$1" == "--update" ]; then
 elif [ "$1" == "--install" ]; then
 	if [ "$(is_installed)" == "" ]; then
 		echo -e -n "Prjs not installed...\n"
-		echo -e -n "Installing..."
+		echo -e -n "Installing alias..."
 		echo -e -n "\n$INSTALLCOMMAND\n" >> ~/.bashrc
 		if [ "$(is_installed)" == "" ]; then
 			echo -e -n "FAILED!\n"
 		else
 			echo -e -n "OK!\n"
+		fi
+		echo -e -n "Installig icon..."
+		cp "prjs-icon.png" "$HOME/.prjs-icon.png"
+		if [ -f "$HOME/.prjs-icon.png" ]; then
+			echo -e -n "OK!\n"
+		else
+			echo -e -n "FAILED!\n"
 		fi
 	else
 		echo -e -n "Prjs is already installed!\n"
@@ -50,13 +57,20 @@ elif [ "$1" == "--install" ]; then
 elif [ "$1" == "--uninstall" ]; then
 	if [ "$(is_installed)" != "" ]; then
 		echo -e -n "Prjs installed...\n"
-		echo -e -n "Uninstalling..."
+		echo -e -n "Uninstalling alias..."
 		INSTALLLINE=$(grep -xn "$INSTALLCOMMAND" "$HOME/.bashrc" | grep -Eo '^[^:]+')
 		sed -i.bak "${INSTALLLINE}d" ~/.bashrc
 		if [ "$(is_installed)" == "" ]; then
 			echo -e -n "OK!\n"
 		else
 			echo -e -n "FAILED!\n"
+		fi
+		echo -e -n "Uninstalling icon..."
+		rm "$HOME/.prjs-icon.png" &> /dev/null
+		if [ -f "$HOME/.prjs-icon.png" ]; then
+			echo -e -n "FAILED!\n"
+		else
+			echo -e -n "OK!\n"
 		fi
 	else
 		echo -e -n "Prjs is not installed\n"
