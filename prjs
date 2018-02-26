@@ -217,7 +217,7 @@ else
 				echo -e -n "No bookmarks made\n"
 				return
 			fi
-			TORUN="zenity --height=600 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
+			TORUN="zenity --height=600 --width=300 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
 			while read -r b; do
 				CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
 				TORUN="$TORUN \"$b\" FALSE "
