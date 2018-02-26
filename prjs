@@ -224,12 +224,20 @@ else
 				echo -e -n "No bookmarks made\n"
 				return
 			fi
-			TORUN="zenity --window-icon=\"$ICONPATH\" --height=600 --width=300 --list --radiolist --text \"Select a project\" --hide-header --column \"Projects\" --column \"Other\" FALSE "
+			PATHS=$(awk 'NR % 2 == 0' "$PRJSFILE")
+			TORUN="zenity --window-icon=\"$ICONPATH\" --height=600 --width=700 --list --text \"Select a project\" --column \"Bookmark\" --column \"Path\" "
+			echo -e -n "Scanning bookmarks..."
 			while read -r b; do
 				CURDIR=$(sed "$((LINENUMB+1))q;d" "$PRJSFILE")
-				TORUN="$TORUN \"$b\" FALSE "
+				TORUN="$TORUN \"$b\" \"$CURDIR\" "
 				LINENUMB=$((LINENUMB+2))
 			done <<< "$BKMARKS"
+			if [ "$LINENUMB" == "0" ]; then
+				echo -e -n "FAIL!\n"
+				echo -e -n "-LINENUMB is still 0\n"
+			else
+				echo -e -n "OK!\n"
+			fi
 			TORUN="$TORUN Exit"
 			TORUN="$TORUN 2>/dev/null"
 			TOBKMRK="$(eval $TORUN)"
