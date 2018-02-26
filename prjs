@@ -142,7 +142,7 @@ elif [ "$1" == "--delall" ] || [ "$1" == "-da" ]; then
 				echo -e -n "OK!\n"
 				echo -e -n "Deleting $d..."
 				prjs -d "$d">/dev/null
-				if [ "$(prjs -l | grep "$d")" == "" ]; then
+				if [ "$(prjs -l | grep -x "$d")" == "" ]; then
 					echo -e -n "OK!\n"
 				else
 					echo -e -n "FAIL!\n"
