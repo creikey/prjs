@@ -2,6 +2,7 @@
 
 PRJSFILE="$HOME/.prjs"
 ICONPATH="$HOME/.prjs-icon.png"
+PRJSEDITOR="atom"
 
 # Check for zenity
 ZENITYSUPPORT=$(command -v zenity)
@@ -199,6 +200,26 @@ elif [ "$1" == "--git-update" ] || [ "$1" == "-gu" ]; then
 		zenity --info --text "$PRJSUPDATED"
 	fi
 	cd "$ORIGINALDIR"
+elif [ "$1" == "--open" ] || [ "$1" == "-o" ]; then
+	echo -e -n "Finding project $2..."
+	if [ "$(prjs -e $2)" != "" ]; then
+		echo -e -n "OK!\n"
+		echo -e -n "Opening editor..."
+		prjs "$2"
+		eval "$PRJSEDITOR ."
+		ERRCODE="$?"
+		if [ "$ERRCODE" == "0" ]; then
+			echo -e -n "OK!\n"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-Exited with error code $ERRCODE\n"
+		fi
+	else
+		echo -e -n "FAIL!\n"
+		echo -e -n "-Could not find project '$2'\n"
+	fi
+elif [ "$1" == "--exists" ] || [ "$1" == "-e" ]; then
+	echo -e -n "$(grep -x $2 $PRJSFILE )"
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
 	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
@@ -212,6 +233,8 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| --delall/-da : deletes all projects in the current working directory\n"
 	echo -e -n "| --git-update/-gu : updates all projects with a git repository on origin/master\n"
 	echo -e -n "| [no args] : opens graphical mode if zenity support\n"
+	echo -e -n "| --open/-o : opens the project in the $PRJSEDITOR editor\n"
+	echo -e -n "| --exists/-e : tests existence of project, returns \"\" if nonexistent, [project name] if it exists\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
@@ -250,21 +273,22 @@ else
 		else
 			echo -e -n "FAIL!\n"
 		fi
-	elif [ "$(cat "$PRJSFILE" | grep -x "$1")" == "" ]; then
-		echo -e -n "Project $1 not found\nProjects:\n"
-		awk 'NR % 2' "$PRJSFILE"
 	else
 		PRJNAMELINE=$(grep -xn "$1" "$PRJSFILE" | grep -Eo '^[^:]+')
-		PATHLINE=$((PRJNAMELINE+1))
-		PRJPATH=$(sed "${PATHLINE}q;d" "$PRJSFILE")
-		cd "$PRJPATH"
-		echo -e -n "\nYou are now in project '$1'\n"
-		echo -e -n "\n------ Contents ------\n"
-		ls
-		if [ -d ".git" ]; then
-			echo -e -n "\n------ Git status ------\n"
-			git status
+		if [ "$PRJNAMELINE" == "" ]; then
+			echo -e -n "Project $1 not found\n"
+		else
+			PATHLINE=$((PRJNAMELINE+1))
+			PRJPATH=$(sed "${PATHLINE}q;d" "$PRJSFILE")
+			cd "$PRJPATH"
+			echo -e -n "\nYou are now in project '$1'\n"
+			echo -e -n "\n------ Contents ------\n"
+			ls
+			if [ -d ".git" ]; then
+				echo -e -n "\n------ Git status ------\n"
+				git status
+			fi
+			echo
 		fi
-		echo
 	fi
 fi
