@@ -81,7 +81,7 @@ elif [ "$1" == "--delete" ] || [ "$1" == "-d" ]; then
 			echo -e -n "Deleted project $2\n"
 		fi
 	else
-		echo -e -n "Could not find $2 in $PRJSFILE"
+		echo -e -n "You must specify a project to delete!\n"
 	fi
 elif [ "$1" == "--restore" ] || [ "$1" == "-r" ]; then
 	if [ -f "$PRJSFILE.bak" ]; then
@@ -219,7 +219,22 @@ elif [ "$1" == "--open" ] || [ "$1" == "-o" ]; then
 		echo -e -n "-Could not find project '$2'\n"
 	fi
 elif [ "$1" == "--exists" ] || [ "$1" == "-e" ]; then
-	echo -e -n "$(grep -x $2 $PRJSFILE )"
+	if [ "$2" == "" ]; then
+		echo -e -n ""
+	else
+		echo -e -n "$(grep -x $2 $PRJSFILE )"
+	fi
+elif [ "$1" == "--directory" ] || [ "$1" == "-gd" ]; then
+	if [ "$(prjs -e $2)" != "" ]; then
+		PRJNAMELINE=$(grep -xn "$2" "$PRJSFILE" | grep -Eo '^[^:]+')
+		PATHLINE=$((PRJNAMELINE+1))
+		PRJPATH=$(sed "${PATHLINE}q;d" "$PRJSFILE")
+		echo -e -n "$PRJPATH\n"
+	elif [ "$2" == "" ]; then
+		echo -e -n "You must specify a project to get the directory of\n"
+	else
+		echo -e -n "Could not find project $2\n"
+	fi
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
 	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
@@ -235,6 +250,7 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| [no args] : opens graphical mode if zenity support\n"
 	echo -e -n "| --open/-o : opens the project in the $PRJSEDITOR editor\n"
 	echo -e -n "| --exists/-e : tests existence of project, returns \"\" if nonexistent, [project name] if it exists\n"
+	echo -e -n "| --directory/-gd [project name] : gets the directory of the input project, returning \"\" if nonexistend\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
