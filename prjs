@@ -235,6 +235,51 @@ elif [ "$1" == "--directory" ] || [ "$1" == "-gd" ]; then
 	else
 		echo -e -n "Could not find project $2\n"
 	fi
+elif [ "$1" == "--get-project" ] || [ "$1" == "-gp" ]; then
+	if [ "$2" == "" ]; then
+		echo e -n "You must specifiy a github username or url\n"
+	elif [ "$3" == "" ]; then
+		echo -e -n "Cloning url $2..."
+		git clone "$2"
+		project_name="${2##*/}"
+		folder_name="$(echo -e -n $project_name | cut -f1 -d".")"
+		ERRCODE="$?"
+		if [ "$ERRCODE" == "0" ]; then
+			echo -e -n "OK!\n"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-fail with error code $ERRCODE\n"
+		fi
+		echo -e -n "Finding folder $folder_name..."
+		if [ -d "$folder_name" ]; then
+			echo -e -n "OK!\n"
+			cd "$folder_name"
+			prjs -s "$folder_name"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-could not find directory\n"
+		fi
+	else
+		GITHUBURL="git@github.com:$2/$3"
+		echo -e -n "Cloning url $GITHUBURL..."
+		git clone "$GITHUBURL"
+		ERRCODE="$?"
+		if [ "$ERRCODE" == "0" ]; then
+			echo -e -n "OK!\n"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-fail with error code $ERRCODE\n"
+		fi
+		echo -e -n "Finding folder $3..."
+		if [ -d "$3" ]; then
+			echo -e -n "OK!\n"
+			cd "$3"
+			prjs -s "$3"
+		else
+			echo -e -n "FAIL!\n"
+			echo -e -n "-fail, could not find folder\n"
+		fi
+	fi
 elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "--Basic project manager--\n\n"
 	echo -e -n "| --set/-s [project name] : Sets the current directory to input project name\n"
@@ -251,6 +296,7 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 	echo -e -n "| --open/-o : opens the project in the $PRJSEDITOR editor\n"
 	echo -e -n "| --exists/-e : tests existence of project, returns \"\" if nonexistent, [project name] if it exists\n"
 	echo -e -n "| --directory/-gd [project name] : gets the directory of the input project, returning \"\" if nonexistend\n"
+	echo -e -n "| --get-project/-gp [github username] [project name] || [clone url] : downloads a project from github ssh\n"
 	echo -e -n "\n-- creikey --\n"
 else
 	if [ "$1" == "" ]; then
