@@ -310,6 +310,7 @@ else
 				return
 			fi
 			PATHS=$(awk 'NR % 2 == 0' "$PRJSFILE")
+      echo "Zenity icon path: ${ICONPATH}"
 			TORUN="zenity --window-icon=\"$ICONPATH\" --height=600 --width=700 --list --text \"Select a project\" --column \"Bookmark\" --column \"Path\" "
 			echo -e -n "Scanning bookmarks..."
 			while read -r b; do
